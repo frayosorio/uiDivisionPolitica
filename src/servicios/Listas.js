@@ -51,15 +51,15 @@ export const Pais = function (id, nombre, codigoAlfa2, codigoAlfa3, tipoRegion, 
     this.continente = continente;
 }
 
-export const listarPaises = async () => {
+export const clienteGQL = IniciarClienteApolo({ ruta: "http://localhost:3020/gqlpais" });
 
-    const cliente = IniciarClienteApolo({ ruta: "http://localhost:3020/gqlpais" });
+export const listarPaises = async () => {
 
     const consulta = gql`{ obtenerPaises { id, nombre, continente, codigoAlfa2, codigoAlfa3, tipoRegion }}`;
 
     var paises = [];
 
-    await cliente
+    await clienteGQL
         .query({ query: consulta })
         .then(({ error, data }) => {
             if (error) {

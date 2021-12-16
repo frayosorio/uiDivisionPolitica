@@ -3,6 +3,7 @@ import { obtenerEstilos, listarPaises, Pais } from "../servicios/Listas";
 import { DataGrid } from "@material-ui/data-grid";
 import React, { useState } from "react";
 import ModalEditar from '../componentes/EditarPais/Modal';
+import Confirmacion from "../componentes/Confirmacion";
 
 const columnas = [
     { field: "id", headerName: "ID", width: 100 },
@@ -36,6 +37,7 @@ const Paises = () => {
 
     const [paisEditado, setPaisEditado] = useState({});
     const [estadoModal, setEstadoModal] = useState(false);
+    const [estadoConfirmacion, setEstadoConfirmacion] = useState(false);
 
     const agregar = () => {
         const paisE = new Pais(-1, "", "", "", -1, "", "");
@@ -57,7 +59,8 @@ const Paises = () => {
     const eliminar = () => {
         if (paisSeleccionado) {
             const paisE = paisSeleccionado;
-
+            setPaisEditado(paisE);
+            setEstadoConfirmacion(true);
         }
         else {
             window.alert("Por favor seleccione el país a eliminar");
@@ -66,6 +69,15 @@ const Paises = () => {
 
     const cerrarModal = () => {
         setEstadoModal(false);
+    }
+
+    const cerrarConfirmacion = () => {
+        setEstadoConfirmacion(false);
+    }
+
+    const aceptarConfirmacion = () => {
+
+        setEstadoConfirmacion(false);
     }
 
     return (
@@ -101,6 +113,13 @@ const Paises = () => {
                     }
                 />
                 <ModalEditar estado={estadoModal} cerrar={cerrarModal} pais={paisEditado} />
+
+                <Confirmacion estado={estadoConfirmacion}
+                    cerrar={cerrarConfirmacion}
+                    aceptar={aceptarConfirmacion}
+                    titulo={"Eliminando País"}
+                    mensaje={"Está seguro?"}
+                />
             </div>
         </div>
     )

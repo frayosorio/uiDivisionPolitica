@@ -1,9 +1,12 @@
-import { obtenerEstilosModal } from '../../servicios/Listas';
+import { obtenerEstilosModal, clienteGQL } from '../../servicios/Listas';
 import { TextField, Button } from "@material-ui/core";
 import React, { useState } from "react";
 import { Autocomplete } from '@material-ui/lab';
+import { gql } from "@apollo/client";
 
 const Formulario = ({ cerrarFormulario, paisEditado }) => {
+
+    const agregando = paisEditado.id == -1;
 
     const estilos = obtenerEstilosModal();
 
@@ -14,13 +17,41 @@ const Formulario = ({ cerrarFormulario, paisEditado }) => {
     const [continente, setContinente] = useState(paisEditado.continente);
     const [tipoRegion, setTipoRegion] = useState(paisEditado.tipoRegion);
 
-    const guardar = (e) => {
-        
+    const guardar = async (e) => {
+        const accion = agregando ? "agregarPais" : "modificarPais"
+        const consulta = gql`mutation actualizarPais {
+            ${accion} (id: ${id},
+                nombre: "${nombre}",
+                continente: "${continente}",
+                tipoRegion: "${tipoRegion}",
+                codigoAlfa2: "${codigoAlfa2}",
+                codigoAlfa3: "${codigoAlfa3}"
+                )
+            {
+                id, nombre, continente, codigoAlfa2, codigoAlfa3, tipoRegion
+            }
+        }`;
+
+        await clienteGQL.mutate({ mutation: consulta })
+            .subscribe(({ data }) => {
+                window.alert("País actualizado");
+                cerrarFormulario();
+            })
+            .catch((error) => {
+                window.alert(`Error agregando país ${error}`)
+            });
     }
 
     const continentes = ["AFRICA", "AMERICA", "ANTARTIDA", "ASIA", "EUROPA", "OCEANIA"];
     const tiposRegiones = ["ESTADO", "DEPARTAMENTO", "PROVINCIA", "PREFECTURA"];
 
+    const seleccionarContinente = (e, continenteEscogido) => {
+        setContinente(continenteEscogido);
+    }
+
+    const seleccionarTipoRegion = (e, tipoRegionEscogida) => {
+        setTipoRegion(tipoRegionEscogida);
+    }
 
     return (
         <form className={estilos.base} onSubmit={guardar}>
@@ -56,7 +87,7 @@ const Formulario = ({ cerrarFormulario, paisEditado }) => {
             <Autocomplete
                 value={continente}
                 options={continentes}
-                onChange={(e) => { setContinente(e.target.value) }}
+                onChange={seleccionarContinente}
                 renderInput={params => (
                     <TextField
                         {...params}
@@ -71,7 +102,7 @@ const Formulario = ({ cerrarFormulario, paisEditado }) => {
             <Autocomplete
                 value={tipoRegion}
                 options={tiposRegiones}
-                onChange={(e) => { setTipoRegion(e.target.value) }}
+                onChange={seleccionarTipoRegion}
                 renderInput={params => (
                     <TextField
                         {...params}
